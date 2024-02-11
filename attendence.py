@@ -67,9 +67,10 @@ def get_faces(frames):
 @torch.no_grad()
 def get_distance(a, b):
     # return torch.nn.functional.mse_loss(a, b)
-    # a = cnn.avgpool(a)
-    # b = cnn.avgpool(b)
-    return (a - b).norm().item()
+    a = cnn.avgpool(a)
+    b = cnn.avgpool(b)
+    # return (a - b).norm().item()
+    return torch.nn.functional.cosine_similarity(a.view(1, -1), b.view(1, -1)).item()
 
 
 @torch.no_grad()
@@ -100,8 +101,8 @@ def match_faces(face, emb_path="./student_embeddings"):
 
 def main():
     print("Getting frames...")
-    all_frames = [get_frames(VID_PATH)[800]]
-    from matplotlib import pyplot as plt
+    all_frames = get_frames(VID_PATH)
+    # from matplotlib import pyplot as plt
 
     print("Detecting faces...")
     all_faces = get_faces(
@@ -113,14 +114,14 @@ def main():
     for face in tqdm(all_faces):
         stud_name, dis = match_faces(face)
         present_stud.append((stud_name, dis))
-    i = 1
-    for face, pred in zip(all_faces, present_stud):
-        plt.subplot(1, 2, i)
-        plt.imshow(face.permute(1, 2, 0).int())
-        plt.title(pred)
-        i += 1
-    plt.show()
     pprint(present_stud)
+    # i = 1
+    # for face, pred in zip(all_faces, present_stud):
+    #     plt.subplot(1, 3, i)
+    #     plt.imshow(face.permute(1, 2, 0).int())
+    #     plt.title(pred)
+    #     i += 1
+    # plt.show()
 
 
 if __name__ == "__main__":
